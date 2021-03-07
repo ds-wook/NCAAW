@@ -44,13 +44,13 @@ def lgb_kfold_model(
         )
 
         lgb_params = {
-            "num_leaves": 62,
-            "reg_alpha": 0.010128063599316449,
-            "reg_lambda": 0.5824200175810507,
-            "colsample_bytree": 0.7521104418815311,
-            "subsample": 0.4004123428146916,
-            "subsample_freq": 3,
-            "min_child_samples": 85,
+            "num_leaves": 44,
+            "reg_alpha": 0.07594836121228826,
+            "reg_lambda": 0.15815236936818577,
+            "colsample_bytree": 0.7006803370931117,
+            "subsample": 0.4195155045232004,
+            "subsample_freq": 7,
+            "min_child_samples": 53,
         }
 
         lgb_params["objective"] = "binary"

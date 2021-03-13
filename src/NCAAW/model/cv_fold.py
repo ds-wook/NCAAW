@@ -29,9 +29,9 @@ def lgb_kfold_model(
 ) -> np.ndarray:
     seasons = df["Season"].unique()
     cvs = []
-    pred_tests = []
-
-    for season in seasons[fold:]:
+    pred_tests = np.zeros(df_test_.shape[0])
+    weights = [0.4, 0.05, 0.1, 0.05, 0.4]
+    for season, weight in zip(seasons[fold:], weights):
         if verbose:
             print(f"\n Validating on season {season}")
 
@@ -44,15 +44,12 @@ def lgb_kfold_model(
         )
 
         lgb_params = {
-            "num_leaves": 44,
-            "reg_alpha": 0.07594836121228826,
-            "reg_lambda": 0.15815236936818577,
-            "colsample_bytree": 0.7006803370931117,
-            "subsample": 0.4195155045232004,
+            "num_leaves": 46,
+            "colsample_bytree": 0.6907148034435002,
+            "subsample": 0.7227715898782178,
             "subsample_freq": 7,
-            "min_child_samples": 53,
+            "min_child_samples": 82,
         }
-
         lgb_params["objective"] = "binary"
         lgb_params["boosting_type"] = "gbdt"
         lgb_params["n_estimators"] = 20000
@@ -81,7 +78,7 @@ def lgb_kfold_model(
                 df_test[features], num_iteration=model.best_iteration_
             )[:, 1]
 
-        pred_tests.append(pred_test)
+        pred_tests += weight * pred_test
         loss = log_loss(df_val[target].values, pred)
         cvs.append(loss)
 
@@ -89,9 +86,7 @@ def lgb_kfold_model(
             print(f"\t -> Scored {loss:.5f}")
 
     print(f"\n Local CV is {np.mean(cvs):.5f}")
-
-    pred_test = np.mean(pred_tests, 0)
-    return pred_test
+    return pred_tests
 
 
 def xgb_kfold_model(
@@ -114,14 +109,14 @@ def xgb_kfold_model(
         )
 
         xgb_params = {
-            "max_depth": 19,
-            "learning_rate": 0.39105238862466,
-            "reg_lambda": 0.0012296744624179649,
-            "reg_alpha": 0.05566013795174765,
-            "gamma": 5.364165258730784,
-            "subsample": 0.7048654124195679,
-            "min_child_weight": 7,
-            "colsample_bytree": 0.5,
+            "max_depth": 18,
+            "learning_rate": 0.5215423456586762,
+            "reg_lambda": 0.5167333145874758,
+            "reg_alpha": 0.2567370412812151,
+            "gamma": 7.006503682572551,
+            "subsample": 0.7920545452005954,
+            "min_child_weight": 8,
+            "colsample_bytree": 0.4,
         }
         xgb_params["objective"] = "binary:logistic"
         xgb_params["eval_metric"] = "logloss"
@@ -176,7 +171,7 @@ def logistic_kfold_model(
 
         df_train, df_val, df_test = rescale(features, df_train, df_val, df_test)
 
-        model = LogisticRegression(C=6)
+        model = LogisticRegression(C=8, intercept_scaling=False, max_iter=1000)
         model.fit(df_train[features], df_train[target])
 
         pred = model.predict_proba(df_val[features])[:, 1]

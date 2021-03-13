@@ -1,5 +1,7 @@
+from typing import List, Tuple
 import re
 
+import numpy as np
 import pandas as pd
 from sklearn.preprocessing import (
     MaxAbsScaler,
@@ -9,23 +11,22 @@ from sklearn.preprocessing import (
     Normalizer,
 )
 
-from typing import List, Tuple
-
 
 def get_round(day: int) -> int:
     round_dic = {
-        134: 0,
-        135: 0,
-        136: 1,
-        137: 1,
-        138: 2,
-        139: 2,
-        143: 3,
+        137: 0,
+        138: 0,
+        139: 1,
+        140: 1,
+        141: 2,
         144: 3,
-        145: 4,
+        145: 3,
         146: 4,
-        152: 5,
-        154: 6,
+        147: 4,
+        148: 4,
+        151: 5,
+        153: 5,
+        155: 6,
     }
     try:
         return round_dic[day]
@@ -108,7 +109,7 @@ def maxabs_scaler(
     df_val[features] = max_abs.fit_transform(df_val[features])
 
     if df_test is not None:
-        df_test[features] = max_abs.transform(df_test[features])
+        df_test[features] = max_abs.fit_transform(df_test[features])
 
     return df_train, df_val, df_test
 
@@ -125,43 +126,7 @@ def standard_scaler(
     df_val[features] = standard_scaler.fit_transform(df_val[features])
 
     if df_test is not None:
-        df_test[features] = standard_scaler.transform(df_test[features])
-
-    return df_train, df_val, df_test
-
-
-def quantile_transformer_scaler(
-    features: List[str],
-    df_train: pd.DataFrame,
-    df_val: pd.DataFrame,
-    df_test: pd.DataFrame = None,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-
-    quantile_transformer = QuantileTransformer()
-
-    df_train[features] = quantile_transformer.fit_transform(df_train[features])
-    df_val[features] = quantile_transformer.fit_transform(df_val[features])
-
-    if df_test is not None:
-        df_test[features] = quantile_transformer.transform(df_test[features])
-
-    return df_train, df_val, df_test
-
-
-def robust_transformer_scaler(
-    features: List[str],
-    df_train: pd.DataFrame,
-    df_val: pd.DataFrame,
-    df_test: pd.DataFrame = None,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-
-    robust_scaler = RobustScaler()
-
-    df_train[features] = robust_scaler.fit_transform(df_train[features])
-    df_val[features] = robust_scaler.fit_transform(df_val[features])
-
-    if df_test is not None:
-        df_test[features] = robust_scaler.transform(df_test[features])
+        df_test[features] = standard_scaler.fit_transform(df_test[features])
 
     return df_train, df_val, df_test
 
@@ -179,6 +144,27 @@ def normalization_scaler(
     df_val[features] = normalization.fit_transform(df_val[features])
 
     if df_test is not None:
-        df_test[features] = normalization.transform(df_test[features])
+        df_test[features] = normalization.fit_transform(df_test[features])
 
     return df_train, df_val, df_test
+
+
+def concat_row(r: pd.DataFrame) -> str:
+    if r["WTeamID"] < r["LTeamID"]:
+        res = str(r["Season"]) + "_" + str(r["WTeamID"]) + "_" + str(r["LTeamID"])
+    else:
+        res = str(r["Season"]) + "_" + str(r["LTeamID"]) + "_" + str(r["WTeamID"])
+    return res
+
+
+# Delete leaked from train
+def delete_leaked_from_df_train(
+    df_train: pd.DataFrame, df_test: pd.DataFrame
+) -> pd.DataFrame:
+    df_train["Concats"] = df_train.apply(concat_row, axis=1)
+    df_train_duplicates = df_train[df_train["Concats"].isin(df_test["ID"].unique())]
+    df_train_idx = df_train_duplicates.index.values
+    df_train = df_train.drop(df_train_idx)
+    df_train = df_train.drop("Concats", axis=1)
+
+    return df_train

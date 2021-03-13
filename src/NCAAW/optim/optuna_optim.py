@@ -6,7 +6,7 @@ from xgboost import XGBClassifier
 from sklearn.metrics import log_loss
 
 from data.dataset import load_dataset
-from data.fea_eng import normalization_scaler
+from data.fea_eng import normalization_scaler, standard_scaler, maxabs_scaler
 
 
 features = [
@@ -36,13 +36,11 @@ def objective(
         "n_estimators": 20000,
         "learning_rate": 0.05,
         "random_state": 42,
-        "num_leaves": trial.suggest_int("num_leaves", 10, 100),
-        "reg_alpha": trial.suggest_loguniform("reg_alpha", 1e-3, 10.0),
-        "reg_lambda": trial.suggest_loguniform("reg_lambda", 1e-3, 10.0),
-        "colsample_bytree": trial.suggest_uniform("colsample_bytree", 0.4, 1.0),
-        "subsample": trial.suggest_uniform("subsample", 0.4, 1.0),
+        "num_leaves": trial.suggest_int("num_leaves", 10, 80),
+        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.4, 1.0),
+        "subsample": trial.suggest_float("subsample", 0.4, 1.0),
         "subsample_freq": trial.suggest_int("subsample_freq", 1, 7),
-        "min_child_samples": trial.suggest_int("min_child_samples", 10, 100),
+        "min_child_samples": trial.suggest_int("min_child_samples", 50, 100),
     }
     seasons = df["Season"].unique()
     cvs = []
@@ -111,7 +109,7 @@ def xgb_objective(
     cvs = []
     pred_tests = []
 
-    for season in seasons[12:]:
+    for season in seasons[7:]:
         df_train = df[df["Season"] < season].reset_index(drop=True).copy()
         df_val = df[df["Season"] == season].reset_index(drop=True).copy()
         df_train, df_val, df_test = normalization_scaler(
@@ -140,3 +138,4 @@ def xgb_objective(
         loss = np.mean(cvs)
 
     return loss
+    

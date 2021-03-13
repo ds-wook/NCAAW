@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from data.dataset import load_dataset
-from model.cv_fold import xgb_kfold_model, lgb_kfold_model
+from model.cv_fold import xgb_kfold_model, lgb_kfold_model, logistic_kfold_model
 
 df, df_test = load_dataset()
 
@@ -19,8 +19,8 @@ if __name__ == "__main__":
     args = parse.parse_args()
 
     lgb_pred = lgb_kfold_model(args.fold, df, df_test)
-    xgb_pred = xgb_kfold_model(args.fold, df, df_test)
-
+    # xgb_pred = xgb_kfold_model(args.fold, df, df_test)
+    # logistic_pred = logistic_kfold_model(args.fold, df, df_test)
     sub = df_test[["ID", "Pred"]].copy()
     sub["Pred"] = lgb_pred
 

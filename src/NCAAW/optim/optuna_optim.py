@@ -6,28 +6,26 @@ from xgboost import XGBClassifier
 from sklearn.metrics import log_loss
 
 from data.dataset import load_dataset
-from data.fea_eng import normalization_scaler, standard_scaler, maxabs_scaler
+from data.fea_eng import normalization_scaler, rescale
 
-
-features = [
-    "SeedA",
-    "SeedB",
-    "WinRatioA",
-    "GapAvgA",
-    "WinRatioB",
-    "GapAvgB",
-    "SeedDiff",
-    "WinRatioDiff",
-    "GapAvgDiff",
-]
-target = "WinA"
 
 df, df_test = load_dataset()
 
 
-def objective(
-    trial: Trial, df: pd.DataFrame = df, df_test: pd.DataFrame = df_test
-) -> float:
+def objective(trial: Trial, df: pd.DataFrame = df) -> float:
+    features = [
+        "SeedA",
+        "SeedB",
+        "WinRatioA",
+        "GapAvgA",
+        "WinRatioB",
+        "GapAvgB",
+        "SeedDiff",
+        "WinRatioDiff",
+        "GapAvgDiff",
+    ]
+
+    target = "WinA"
 
     params = {
         "objective": "binary",
@@ -42,16 +40,12 @@ def objective(
         "subsample_freq": trial.suggest_int("subsample_freq", 1, 7),
         "min_child_samples": trial.suggest_int("min_child_samples", 50, 100),
     }
-    seasons = df["Season"].unique()
-    cvs = []
-    pred_tests = []
-
-    for season in seasons[12:]:
+    seasons = np.array([2017, 2018, 2019])
+    cvs = np.array([])
+    for season in seasons:
         df_train = df[df["Season"] < season].reset_index(drop=True).copy()
         df_val = df[df["Season"] == season].reset_index(drop=True).copy()
-        df_train, df_val, df_test = normalization_scaler(
-            features, df_train, df_val, df_test
-        )
+        df_train, df_val = normalization_scaler(features, df_train, df_val)
 
         model = LGBMClassifier(**params)
         model.fit(
@@ -70,15 +64,11 @@ def objective(
             df_val[features], num_iteration=model.best_iteration_
         )[:, 1]
 
-        if df_test is not None:
-            pred_test = model.predict_proba(
-                df_test[features], num_iteration=model.best_iteration_
-            )[:, 1]
-
-        pred_tests.append(pred_test)
         loss = log_loss(df_val[target].values, pred)
-        cvs.append(loss)
-        loss = np.mean(cvs)
+        cvs = np.append(cvs, loss)
+
+    weights = np.array([0.1, 0.1, 0.8])
+    loss = np.sum(weights * cvs)
 
     return loss
 
@@ -86,6 +76,19 @@ def objective(
 def xgb_objective(
     trial: Trial, df: pd.DataFrame = df, df_test: pd.DataFrame = df_test
 ) -> float:
+    features = [
+        "SeedA",
+        "SeedB",
+        "WinRatioA",
+        "GapAvgA",
+        "WinRatioB",
+        "GapAvgB",
+        "SeedDiff",
+        "WinRatioDiff",
+        "GapAvgDiff",
+    ]
+
+    target = "WinA"
 
     params = {
         "objective": "binary:logistic",
@@ -105,11 +108,11 @@ def xgb_objective(
         ),
     }
 
-    seasons = df["Season"].unique()
-    cvs = []
+    seasons = np.array([2015, 2016, 2017, 2018, 2019])
+    cvs = np.array([])
     pred_tests = []
 
-    for season in seasons[7:]:
+    for season in seasons:
         df_train = df[df["Season"] < season].reset_index(drop=True).copy()
         df_val = df[df["Season"] == season].reset_index(drop=True).copy()
         df_train, df_val, df_test = normalization_scaler(
@@ -134,8 +137,8 @@ def xgb_objective(
 
         pred_tests.append(pred_test)
         loss = log_loss(df_val[target].values, pred)
-        cvs.append(loss)
-        loss = np.mean(cvs)
+        cvs = np.append(cvs, loss)
 
+    weights = np.array([0.1, 0.1, 0.2, 0.2, 0.3])
+    loss = np.sum(weights * cvs)
     return loss
-    

@@ -93,8 +93,9 @@ def rescale(
 
     if df_test is not None:
         df_test[features] = (df_test[features] - min_) / (max_ - min_)
+        return df_train, df_val, df_test
 
-    return df_train, df_val, df_test
+    return df_train, df_val
 
 
 def maxabs_scaler(
@@ -145,8 +146,9 @@ def normalization_scaler(
 
     if df_test is not None:
         df_test[features] = normalization.fit_transform(df_test[features])
+        return df_train, df_val, df_test
 
-    return df_train, df_val, df_test
+    return df_train, df_val
 
 
 def concat_row(r: pd.DataFrame) -> str:

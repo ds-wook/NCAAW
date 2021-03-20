@@ -5,7 +5,7 @@ from data.fea_eng import get_round, treat_seed, add_loosing_matches
 
 
 def load_dataset() -> Tuple[pd.DataFrame, pd.DataFrame]:
-    path = "../../input/ncaaw-march-mania-2021/"
+    path = "../../input/ncaaw-march-mania-2021/WDataFiles_Stage1/"
 
     df_seeds = pd.read_csv(path + "WNCAATourneySeeds.csv")
 
@@ -81,18 +81,8 @@ def load_dataset() -> Tuple[pd.DataFrame, pd.DataFrame]:
     df_features_season.drop(
         ["NumWins", "NumLosses", "GapWins", "GapLosses"], axis=1, inplace=True
     )
-    df_tourney_results = pd.read_csv(
-        filepath_or_buffer=path + "WNCAATourneyCompactResults.csv",
-        low_memory=False,
-        encoding="utf-8",
-        sep=",",
-    )
-    df_test = pd.read_csv(
-        filepath_or_buffer=path + "WSampleSubmissionStage1.csv",
-        low_memory=False,
-        encoding="utf-8",
-        sep=",",
-    )
+    df_tourney_results = pd.read_csv(path + "WNCAATourneyCompactResults.csv")
+
     df_tourney_results.drop(["NumOT", "WLoc"], axis=1, inplace=True)
     df_tourney_results["Round"] = df_tourney_results["DayNum"].apply(get_round)
 
@@ -174,6 +164,7 @@ def load_dataset() -> Tuple[pd.DataFrame, pd.DataFrame]:
     df["ScoreDiff"] = df["ScoreA"] - df["ScoreB"]
     df["WinA"] = (df["ScoreDiff"] > 0).astype(int)
 
+    df_test = pd.read_csv(path + "WSampleSubmissionStage1.csv")
     df_test["Season"] = df_test["ID"].apply(lambda x: int(x.split("_")[0]))
     df_test["TeamIdA"] = df_test["ID"].apply(lambda x: int(x.split("_")[1]))
     df_test["TeamIdB"] = df_test["ID"].apply(lambda x: int(x.split("_")[2]))

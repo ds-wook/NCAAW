@@ -23,6 +23,7 @@ def objective(trial: Trial, df: pd.DataFrame = df) -> float:
         "SeedDiff",
         "WinRatioDiff",
         "GapAvgDiff",
+        "WinProb",
     ]
 
     target = "WinA"

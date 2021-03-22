@@ -1,11 +1,11 @@
 from typing import Tuple
 
 import pandas as pd
-from data.fea_eng import get_round, treat_seed, add_loosing_matches
+from data.fea_eng import get_round, treat_seed, add_loosing_matches, calculate_win_proba
 
 
 def load_dataset() -> Tuple[pd.DataFrame, pd.DataFrame]:
-    path = "../../input/ncaaw-march-mania-2021/WDataFiles_Stage1/"
+    path = "../../input/ncaaw-march-mania-2021/WDataFiles_Stage2/"
 
     df_seeds = pd.read_csv(path + "WNCAATourneySeeds.csv")
 
@@ -164,7 +164,7 @@ def load_dataset() -> Tuple[pd.DataFrame, pd.DataFrame]:
     df["ScoreDiff"] = df["ScoreA"] - df["ScoreB"]
     df["WinA"] = (df["ScoreDiff"] > 0).astype(int)
 
-    df_test = pd.read_csv(path + "WSampleSubmissionStage1.csv")
+    df_test = pd.read_csv(path + "WSampleSubmissionStage2.csv")
     df_test["Season"] = df_test["ID"].apply(lambda x: int(x.split("_")[0]))
     df_test["TeamIdA"] = df_test["ID"].apply(lambda x: int(x.split("_")[1]))
     df_test["TeamIdB"] = df_test["ID"].apply(lambda x: int(x.split("_")[2]))
@@ -237,5 +237,11 @@ def load_dataset() -> Tuple[pd.DataFrame, pd.DataFrame]:
     df_test["SeedDiff"] = df_test["SeedA"] - df_test["SeedB"]
     df_test["WinRatioDiff"] = df_test["WinRatioA"] - df_test["WinRatioB"]
     df_test["GapAvgDiff"] = df_test["GapAvgA"] - df_test["GapAvgB"]
-
+    df_test = pd.merge(
+        df_test,
+        df[["TeamIdA", "WinProb"]],
+        how="left",
+        left_on="TeamIdA",
+        right_on="TeamIdA",
+    )
     return df, df_test

@@ -4,7 +4,7 @@ from sklearn.metrics import log_loss
 from lightgbm import LGBMClassifier
 from xgboost import XGBClassifier
 
-from data.fea_eng import rescale, normalization_scaler
+from data.fea_eng import normalization_scaler
 
 
 def lgb_kfold_model(
@@ -24,10 +24,10 @@ def lgb_kfold_model(
     ]
     target = "WinA"
 
-    seasons = np.array([2017, 2018, 2019])
+    seasons = np.array([2015, 2016, 2017, 2018, 2019])
     cvs = np.array([])
     pred_tests = np.zeros(df_test_.shape[0])
-    weights = np.array([0.1, 0.1, 0.8])
+    weights = [0.4, 0.05, 0.1, 0.05, 0.4]
 
     for season, weight in zip(seasons, weights):
         if verbose:
@@ -104,10 +104,10 @@ def xgb_kfold_model(
     ]
     target = "WinA"
 
-    seasons = np.array([2015, 2016, 2017, 2018, 2019])
+    seasons = np.array([2017, 2018, 2019])
     cvs = np.array([])
     pred_tests = np.zeros(df_test_.shape[0])
-    weights = np.array([0.1, 0.1, 0.2, 0.2, 0.3])
+    weights = np.array([0.1, 0.1, 0.8])
 
     for season, weight in zip(seasons, weights):
         if verbose:

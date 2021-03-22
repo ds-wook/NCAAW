@@ -5,9 +5,16 @@ Predict the 2021 NCAAW Basketball Tournament
 
 This is a collection of my code from the [March Machine Learning Mania 2021 - NCAAW](https://www.kaggle.com/c/ncaaw-march-mania-2021) Kaggle competition.
 
-## Code Style
-I follow [black](https://pypi.org/project/black/) for code style.
-Black is a PEP 8 compliant opinionated formatter.
+## Requirements
+```
+lightgbm==3.1.1
+numpy==1.20.1
+optuna==2.5.0
+pandas==1.2.2
+plotly==4.14.3
+scikit-learn==0.24.1
+scipy==1.6.1
+```
 
 ## Feature Engineering
 + SeedA
@@ -21,16 +28,6 @@ Black is a PEP 8 compliant opinionated formatter.
 + GapAvgDiff
 + WinA: target
 
-## Requirements
-```
-lightgbm==3.1.1
-numpy==1.20.1
-optuna==2.5.0
-pandas==1.2.2
-plotly==4.14.3
-scikit-learn==0.24.1
-scipy==1.6.1
-```
 
 ## Model
 Light GBM is very nice Ensemble model. I use XGBoost but It's not good performence this datasets.

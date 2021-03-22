@@ -23,7 +23,6 @@ def objective(trial: Trial, df: pd.DataFrame = df) -> float:
         "SeedDiff",
         "WinRatioDiff",
         "GapAvgDiff",
-        "WinProb",
     ]
 
     target = "WinA"
@@ -41,7 +40,7 @@ def objective(trial: Trial, df: pd.DataFrame = df) -> float:
         "subsample_freq": trial.suggest_int("subsample_freq", 1, 7),
         "min_child_samples": trial.suggest_int("min_child_samples", 50, 100),
     }
-    seasons = np.array([2017, 2018, 2019])
+    seasons = np.array([2015, 2016, 2017, 2018, 2019])
     cvs = np.array([])
     for season in seasons:
         df_train = df[df["Season"] < season].reset_index(drop=True).copy()
@@ -68,7 +67,7 @@ def objective(trial: Trial, df: pd.DataFrame = df) -> float:
         loss = log_loss(df_val[target].values, pred)
         cvs = np.append(cvs, loss)
 
-    weights = np.array([0.1, 0.1, 0.8])
+    weights = np.array([0.4, 0.05, 0.1, 0.05, 0.4])
     loss = np.sum(weights * cvs)
 
     return loss

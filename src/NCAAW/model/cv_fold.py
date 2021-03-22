@@ -27,7 +27,7 @@ def lgb_kfold_model(
     seasons = np.array([2015, 2016, 2017, 2018, 2019])
     cvs = np.array([])
     pred_tests = np.zeros(df_test_.shape[0])
-    weights = [0.4, 0.05, 0.1, 0.05, 0.4]
+    weights = np.array([0.4, 0.05, 0.1, 0.05, 0.4])
 
     for season, weight in zip(seasons, weights):
         if verbose:

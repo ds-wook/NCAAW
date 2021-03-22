@@ -1,7 +1,7 @@
 from typing import Tuple
 
 import pandas as pd
-from data.fea_eng import get_round, treat_seed, add_loosing_matches, calculate_win_proba
+from data.fea_eng import get_round, treat_seed, add_loosing_matches
 
 
 def load_dataset() -> Tuple[pd.DataFrame, pd.DataFrame]:

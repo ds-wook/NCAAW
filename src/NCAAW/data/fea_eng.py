@@ -1,16 +1,8 @@
 from typing import List, Tuple
 import re
 
-import numpy as np
 import pandas as pd
-from scipy.stats import binom
-from sklearn.preprocessing import (
-    MaxAbsScaler,
-    StandardScaler,
-    QuantileTransformer,
-    RobustScaler,
-    Normalizer,
-)
+from sklearn.preprocessing import Normalizer
 
 
 def get_round(day: int) -> int:
@@ -80,59 +72,6 @@ def add_loosing_matches(win_df: pd.DataFrame) -> pd.DataFrame:
     return pd.concat([win_df, lose_df], 0, sort=False)
 
 
-def rescale(
-    features: List[str],
-    df_train: pd.DataFrame,
-    df_val: pd.DataFrame,
-    df_test: pd.DataFrame = None,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    min_ = df_train[features].min()
-    max_ = df_train[features].max()
-
-    df_train[features] = (df_train[features] - min_) / (max_ - min_)
-    df_val[features] = (df_val[features] - min_) / (max_ - min_)
-
-    if df_test is not None:
-        df_test[features] = (df_test[features] - min_) / (max_ - min_)
-        return df_train, df_val, df_test
-
-    return df_train, df_val
-
-
-def maxabs_scaler(
-    features: List[str],
-    df_train: pd.DataFrame,
-    df_val: pd.DataFrame,
-    df_test: pd.DataFrame = None,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    max_abs = MaxAbsScaler()
-
-    df_train[features] = max_abs.fit_transform(df_train[features])
-    df_val[features] = max_abs.fit_transform(df_val[features])
-
-    if df_test is not None:
-        df_test[features] = max_abs.fit_transform(df_test[features])
-
-    return df_train, df_val, df_test
-
-
-def standard_scaler(
-    features: List[str],
-    df_train: pd.DataFrame,
-    df_val: pd.DataFrame,
-    df_test: pd.DataFrame = None,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    standard_scaler = StandardScaler()
-
-    df_train[features] = standard_scaler.fit_transform(df_train[features])
-    df_val[features] = standard_scaler.fit_transform(df_val[features])
-
-    if df_test is not None:
-        df_test[features] = standard_scaler.fit_transform(df_test[features])
-
-    return df_train, df_val, df_test
-
-
 def normalization_scaler(
     features: List[str],
     df_train: pd.DataFrame,
@@ -158,16 +97,3 @@ def concat_row(r: pd.DataFrame) -> str:
     else:
         res = str(r["Season"]) + "_" + str(r["LTeamID"]) + "_" + str(r["WTeamID"])
     return res
-
-
-# Delete leaked from train
-def delete_leaked_from_df_train(
-    df_train: pd.DataFrame, df_test: pd.DataFrame
-) -> pd.DataFrame:
-    df_train["Concats"] = df_train.apply(concat_row, axis=1)
-    df_train_duplicates = df_train[df_train["Concats"].isin(df_test["ID"].unique())]
-    df_train_idx = df_train_duplicates.index.values
-    df_train = df_train.drop(df_train_idx)
-    df_train = df_train.drop("Concats", axis=1)
-
-    return df_train

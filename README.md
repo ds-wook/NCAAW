@@ -33,7 +33,8 @@ scipy==1.6.1
 ```
 
 ## Model
-Light GBM is very nice Ensemble model.
+Light GBM is very nice Ensemble model. I use XGBoost but It's not good performence this datasets.
+
 
 ## Cross Validation Strategy
 + time series split cross-validation

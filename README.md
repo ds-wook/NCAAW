@@ -39,7 +39,7 @@ Light GBM is very nice Ensemble model. I use XGBoost but It's not good performen
 ## Cross Validation Strategy
 + time series split cross-validation
 <img src="image/time series split cross-validation.JPG"  width="700" height="370">
-
+It is a model that is weighted for each year.
 
 ## Tree-structured Parzen Estimator (TPE) Approach Hyper Parameter Tunning
 [Optuna](https://optuna.org/) is an open source hyperparameter optimization framework to automate hyperparameter search. I used TPE algorithm.
